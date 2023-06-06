@@ -1,13 +1,10 @@
 package ru.skypro.coursework.easyauction.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.coursework.easyauction.model.Bid;
-import ru.skypro.coursework.easyauction.model.Lot;
 import ru.skypro.coursework.easyauction.model.dto.BidDTO;
+import ru.skypro.coursework.easyauction.model.dto.CreateBid;
 import ru.skypro.coursework.easyauction.model.dto.CreateLot;
 import ru.skypro.coursework.easyauction.model.projections.FullLot;
 import ru.skypro.coursework.easyauction.service.LotService;
@@ -33,7 +30,7 @@ public class LotController {
 
     // 3. Сделать ставку по лоту
     @PostMapping("/{id}/bid")
-    public void bid(@PathVariable int id, @Valid @RequestBody Bid bid) {
+    public void bid(@PathVariable int id, @Valid @RequestBody CreateBid bid) {
         lotService.bid(id, bid);
     }
 

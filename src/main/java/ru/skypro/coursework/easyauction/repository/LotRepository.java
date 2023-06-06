@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import ru.skypro.coursework.easyauction.model.Bid;
 import ru.skypro.coursework.easyauction.model.Lot;
-import ru.skypro.coursework.easyauction.model.projections.FullLot;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,4 +25,9 @@ public interface LotRepository extends CrudRepository<Lot, Integer> {
     @Query(value = "SELECT DISTINCT (?1 * lots.bid_price + lots.start_price) " +
             "FROM lots JOIN bids ON bids.lot_id = lots.id WHERE bids.lot_id = ?2", nativeQuery = true)
     int getCurrentPrice(int bidNumber, int id);
+
+    @Query(value = "SELECT new ru.skypro.coursework.easyauction.model.Bid(b.bidderName, b.bidDate) " +
+            "FROM Bid b WHERE b.lot.id = ?1 GROUP BY b.bidderName, b.bidDate " +
+            "ORDER BY COUNT (b.bidderName) DESC, b.bidDate DESC LIMIT 1")
+    Bid getMostFrequentBidder(int id);
 }

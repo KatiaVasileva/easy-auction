@@ -1,7 +1,5 @@
 package ru.skypro.coursework.easyauction.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import ru.skypro.coursework.easyauction.exceptions.BidNotFoundException;
 import ru.skypro.coursework.easyauction.exceptions.LotNotFoundException;
@@ -9,16 +7,14 @@ import ru.skypro.coursework.easyauction.exceptions.LotStatusException;
 import ru.skypro.coursework.easyauction.model.Bid;
 import ru.skypro.coursework.easyauction.model.BidSortingByDate;
 import ru.skypro.coursework.easyauction.model.Lot;
-import ru.skypro.coursework.easyauction.model.Status;
 import ru.skypro.coursework.easyauction.model.dto.BidDTO;
+import ru.skypro.coursework.easyauction.model.dto.CreateBid;
 import ru.skypro.coursework.easyauction.model.dto.CreateLot;
 import ru.skypro.coursework.easyauction.model.projections.FullLot;
 import ru.skypro.coursework.easyauction.repository.LotRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class LotServiceImpl implements LotService {
@@ -47,7 +43,8 @@ public class LotServiceImpl implements LotService {
     }
 
     @Override
-    public void bid(int id, Bid bid) {
+    public void bid(int id, CreateBid createBid) {
+        Bid bid = createBid.toBid();
         Lot lot = lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
         if (lot.getStatus().equals("Created") || lot.getStatus().equals("Stopped")) {
             throw new LotStatusException();
@@ -79,7 +76,8 @@ public class LotServiceImpl implements LotService {
 
     @Override
     public BidDTO getMostFrequentBidder(int id) {
-        return null;
+        Bid bid = lotRepository.getMostFrequentBidder(id);
+        return BidDTO.fromBid(bid);
     }
 
     @Override
