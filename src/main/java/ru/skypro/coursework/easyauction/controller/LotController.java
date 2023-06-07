@@ -2,12 +2,19 @@ package ru.skypro.coursework.easyauction.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.coursework.easyauction.model.dto.BidDTO;
 import ru.skypro.coursework.easyauction.model.dto.CreateBid;
 import ru.skypro.coursework.easyauction.model.dto.CreateLot;
+import ru.skypro.coursework.easyauction.model.dto.LotDTO;
 import ru.skypro.coursework.easyauction.model.projections.FullLot;
 import ru.skypro.coursework.easyauction.service.LotService;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/lot")
@@ -56,5 +63,12 @@ public class LotController {
     @GetMapping("/{id}")
     public FullLot getFullLot(@PathVariable int id) {
         return lotService.getFullLot(id);
+    }
+
+    // 8. Получить все лоты, основываясь на фильтре статуса и номере страницы
+    @GetMapping("")
+    public List<LotDTO> findLots(@RequestParam(value = "page", required = false) Integer pageIndex,
+                                  @RequestParam(value = "status") String status) {
+        return lotService.findLots(pageIndex, status);
     }
 }

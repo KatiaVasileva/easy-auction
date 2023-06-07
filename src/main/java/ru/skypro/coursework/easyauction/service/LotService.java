@@ -3,7 +3,10 @@ package ru.skypro.coursework.easyauction.service;
 import ru.skypro.coursework.easyauction.model.dto.BidDTO;
 import ru.skypro.coursework.easyauction.model.dto.CreateBid;
 import ru.skypro.coursework.easyauction.model.dto.CreateLot;
+import ru.skypro.coursework.easyauction.model.dto.LotDTO;
 import ru.skypro.coursework.easyauction.model.projections.FullLot;
+
+import java.util.List;
 
 public interface LotService {
 
@@ -20,4 +23,6 @@ public interface LotService {
     BidDTO getMostFrequentBidder(int id);
 
     FullLot getFullLot(int id);
+
+    List<LotDTO> findLots(Integer pageIndex, String status);
 }

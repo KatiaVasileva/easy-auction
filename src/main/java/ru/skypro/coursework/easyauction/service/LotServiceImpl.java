@@ -1,5 +1,7 @@
 package ru.skypro.coursework.easyauction.service;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.skypro.coursework.easyauction.exceptions.BidNotFoundException;
 import ru.skypro.coursework.easyauction.exceptions.LotNotFoundException;
@@ -10,11 +12,14 @@ import ru.skypro.coursework.easyauction.model.Lot;
 import ru.skypro.coursework.easyauction.model.dto.BidDTO;
 import ru.skypro.coursework.easyauction.model.dto.CreateBid;
 import ru.skypro.coursework.easyauction.model.dto.CreateLot;
+import ru.skypro.coursework.easyauction.model.dto.LotDTO;
 import ru.skypro.coursework.easyauction.model.projections.FullLot;
 import ru.skypro.coursework.easyauction.repository.LotRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class LotServiceImpl implements LotService {
@@ -34,11 +39,10 @@ public class LotServiceImpl implements LotService {
     @Override
     public void startBidding(int id) {
         Lot lot = lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
-        if (lot.getStatus().equals("Created") || lot.getStatus().equals("Started")) {
-            lot.setStatus("Started");
-        } else {
+        if (lot.getStatus().equals("Stopped")) {
             throw new LotStatusException();
         }
+        lot.setStatus("Started");
         lotRepository.save(lot);
     }
 
@@ -46,37 +50,41 @@ public class LotServiceImpl implements LotService {
     public void bid(int id, CreateBid createBid) {
         Bid bid = createBid.toBid();
         Lot lot = lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
-        if (lot.getStatus().equals("Created") || lot.getStatus().equals("Stopped")) {
+        if (!lot.getStatus().equals("Started")) {
             throw new LotStatusException();
-        } else {
-            String name = bid.getBidderName();
-            LocalDateTime localDateTime = bid.getBidDate();
-            lotRepository.createBid(name, localDateTime, id);
         }
+        String name = bid.getBidderName();
+        LocalDateTime localDateTime = bid.getBidDate();
+        lotRepository.createBid(name, localDateTime, id);
     }
 
     @Override
     public void stopBidding(int id) {
         Lot lot = lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
-        if (lot.getStatus().equals("Stopped") || lot.getStatus().equals("Started")) {
-            lot.setStatus("Stopped");
-        } else {
+        if (lot.getStatus().equals("Created")) {
             throw new LotStatusException();
         }
+        lot.setStatus("Stopped");
         lotRepository.save(lot);
     }
 
     @Override
     public BidDTO getFirstBidder(int id) {
-        List<Bid> bidList = lotRepository.getBidListByLotId(id);
-        return bidList.stream().sorted(new BidSortingByDate())
-                .map(BidDTO::fromBid)
-                .findFirst().orElseThrow(BidNotFoundException::new);
+        lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
+        Bid bid = lotRepository.getFirstBidder(id);
+        if (bid == null) {
+            throw new BidNotFoundException();
+        }
+        return BidDTO.fromBid(bid);
     }
 
     @Override
     public BidDTO getMostFrequentBidder(int id) {
+        lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
         Bid bid = lotRepository.getMostFrequentBidder(id);
+        if (bid == null) {
+            throw new BidNotFoundException();
+        }
         return BidDTO.fromBid(bid);
     }
 
@@ -93,8 +101,7 @@ public class LotServiceImpl implements LotService {
         int bidNumber = lotRepository.getBidNumber(id);
         int currentPrice = bidNumber == 0 ? lot.getStartPrice() : lotRepository.getCurrentPrice(bidNumber, id);
         fullLot.setCurrentPrice(currentPrice);
-        List<Bid> bidList = lotRepository.getBidListByLotId(id);
-        Bid bid = bidList.stream().max(new BidSortingByDate()).orElse(null);
+        Bid bid = lotRepository.getLastBid(id);
         if (bid == null) {
             fullLot.setLastBidderName(null);
             fullLot.setLastBidDate(null);
@@ -103,5 +110,12 @@ public class LotServiceImpl implements LotService {
             fullLot.setLastBidDate(bid.getBidDate());
         }
         return fullLot;
+    }
+
+    @Override
+    public List<LotDTO> findLots(Integer pageIndex, String status) {
+        Pageable lotsOfConcretePage = PageRequest.of(Objects.requireNonNullElse(pageIndex, 0), 10);
+        return lotRepository.findAllByStatus(lotsOfConcretePage, status).stream()
+                .map(LotDTO::fromLot).collect(Collectors.toList());
     }
 }
