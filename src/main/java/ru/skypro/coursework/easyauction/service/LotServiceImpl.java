@@ -38,7 +38,7 @@ public class LotServiceImpl implements LotService {
 
     @Override
     public void startBidding(int id) {
-        Lot lot = lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
+        Lot lot = getLotByID(id);
         if (lot.getStatus().equals("Stopped")) {
             throw new LotStatusException();
         }
@@ -46,10 +46,14 @@ public class LotServiceImpl implements LotService {
         lotRepository.save(lot);
     }
 
+    private Lot getLotByID(int id) {
+        return lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
+    }
+
     @Override
     public void bid(int id, CreateBid createBid) {
         Bid bid = createBid.toBid();
-        Lot lot = lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
+        Lot lot = getLotByID(id);
         if (!lot.getStatus().equals("Started")) {
             throw new LotStatusException();
         }
@@ -60,7 +64,7 @@ public class LotServiceImpl implements LotService {
 
     @Override
     public void stopBidding(int id) {
-        Lot lot = lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
+        Lot lot = getLotByID(id);
         if (lot.getStatus().equals("Created")) {
             throw new LotStatusException();
         }
@@ -91,7 +95,7 @@ public class LotServiceImpl implements LotService {
     @Override
     public FullLot getFullLot(int id) {
         FullLot fullLot = new FullLot();
-        Lot lot = lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
+        Lot lot = getLotByID(id);
         fullLot.setId(lot.getId());
         fullLot.setStatus(lot.getStatus());
         fullLot.setTitle(lot.getTitle());
