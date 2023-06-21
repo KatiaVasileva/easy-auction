@@ -2,8 +2,9 @@ package ru.skypro.coursework.easyauction.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.coursework.easyauction.model.dto.BidDTO;
 import ru.skypro.coursework.easyauction.model.dto.CreateBid;
@@ -12,9 +13,8 @@ import ru.skypro.coursework.easyauction.model.dto.LotDTO;
 import ru.skypro.coursework.easyauction.model.projections.FullLot;
 import ru.skypro.coursework.easyauction.service.LotService;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/lot")
@@ -70,5 +70,11 @@ public class LotController {
     public List<LotDTO> findLots(@RequestParam(value = "page", required = false) Integer pageIndex,
                                   @RequestParam(value = "status") String status) {
         return lotService.findLots(pageIndex, status);
+    }
+
+    // 9. Экспортировать все лоты в файл CSV
+    @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<Resource> getCSVFile() throws IOException {
+        return lotService.getCSVFile();
     }
 }

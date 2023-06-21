@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 21062023_create_bids
+      author: katiavasileva
+      changes:
+        - createTable:
+            tableName: bids
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: bidder_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: bid_date
+                  type: timestamp(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lot_id
+                  type: int

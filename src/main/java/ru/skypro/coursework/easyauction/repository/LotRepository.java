@@ -7,7 +7,6 @@ import ru.skypro.coursework.easyauction.model.Bid;
 import ru.skypro.coursework.easyauction.model.Lot;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 public interface LotRepository extends CrudRepository<Lot, Integer> {
@@ -25,14 +24,12 @@ public interface LotRepository extends CrudRepository<Lot, Integer> {
     @Query(value = "SELECT new ru.skypro.coursework.easyauction.model.Bid(b.bidderName, b.bidDate) " +
             "FROM Bid b WHERE b.lot.id = ?1 GROUP BY b.bidderName, b.bidDate " +
             "HAVING b.bidDate = (SELECT MAX(b.bidDate) FROM Bid b WHERE b.lot.id = ?1)")
-    Bid getLastBid(int id);
+    Bid getLastBidder(int id);
 
-    @Query(value = "SELECT COUNT(bids) FROM bids WHERE lot_id = ?1", nativeQuery = true)
-    int getBidNumber(int id);
-
-    @Query(value = "SELECT DISTINCT (?1 * lots.bid_price + lots.start_price) " +
-            "FROM lots JOIN bids ON bids.lot_id = lots.id WHERE bids.lot_id = ?2", nativeQuery = true)
-    int getCurrentPrice(int bidNumber, int id);
+    @Query(value = "SELECT DISTINCT ((SELECT COUNT(bids) FROM bids WHERE lot_id = ?1) * lots.bid_price + lots.start_price) " +
+            "FROM lots JOIN bids ON bids.lot_id = lots.id " +
+            "WHERE bids.lot_id = ?1", nativeQuery = true)
+    int getCurrentPrice(int id);
 
     @Query(value = "SELECT bidder_name, MAX(bid_date) FROM bids WHERE lot_id = ?1 GROUP BY bidder_name " +
             "ORDER BY COUNT(bidder_name) DESC, MAX(bid_date) DESC LIMIT 1", nativeQuery = true)
@@ -40,5 +37,10 @@ public interface LotRepository extends CrudRepository<Lot, Integer> {
 
     @Query(value = "SELECT * FROM lots WHERE status = ?1", nativeQuery = true)
     List<Lot> findAllByStatus(Pageable lotsOfConcretePage, String status);
+
+
+    @Query(value = "SELECT * FROM lots", nativeQuery = true)
+    List<Lot> findAllLots();
+
 }
 

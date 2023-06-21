@@ -1,22 +1,29 @@
 package ru.skypro.coursework.easyauction.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.skypro.coursework.easyauction.exceptions.BidNotFoundException;
 import ru.skypro.coursework.easyauction.exceptions.LotNotFoundException;
 import ru.skypro.coursework.easyauction.exceptions.LotStatusException;
 import ru.skypro.coursework.easyauction.model.Bid;
-import ru.skypro.coursework.easyauction.model.BidSortingByDate;
 import ru.skypro.coursework.easyauction.model.Lot;
 import ru.skypro.coursework.easyauction.model.dto.BidDTO;
 import ru.skypro.coursework.easyauction.model.dto.CreateBid;
 import ru.skypro.coursework.easyauction.model.dto.CreateLot;
 import ru.skypro.coursework.easyauction.model.dto.LotDTO;
+import ru.skypro.coursework.easyauction.model.projections.CSVFormatLot;
 import ru.skypro.coursework.easyauction.model.projections.FullLot;
 import ru.skypro.coursework.easyauction.repository.LotRepository;
 
+import java.io.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -74,7 +81,7 @@ public class LotServiceImpl implements LotService {
 
     @Override
     public BidDTO getFirstBidder(int id) {
-        lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
+        getLotByID(id);
         Bid bid = lotRepository.getFirstBidder(id);
         if (bid == null) {
             throw new BidNotFoundException();
@@ -84,7 +91,7 @@ public class LotServiceImpl implements LotService {
 
     @Override
     public BidDTO getMostFrequentBidder(int id) {
-        lotRepository.findById(id).orElseThrow(LotNotFoundException::new);
+        getLotByID(id);
         Bid bid = lotRepository.getMostFrequentBidder(id);
         if (bid == null) {
             throw new BidNotFoundException();
@@ -102,14 +109,14 @@ public class LotServiceImpl implements LotService {
         fullLot.setDescription(lot.getDescription());
         fullLot.setStartPrice(lot.getStartPrice());
         fullLot.setBidPrice(lot.getBidPrice());
-        int bidNumber = lotRepository.getBidNumber(id);
-        int currentPrice = bidNumber == 0 ? lot.getStartPrice() : lotRepository.getCurrentPrice(bidNumber, id);
-        fullLot.setCurrentPrice(currentPrice);
-        Bid bid = lotRepository.getLastBid(id);
+        Bid bid = lotRepository.getLastBidder(id);
         if (bid == null) {
+            fullLot.setCurrentPrice(lot.getStartPrice());
             fullLot.setLastBidderName(null);
             fullLot.setLastBidDate(null);
         } else {
+            int currentPrice = lotRepository.getCurrentPrice(id);
+            fullLot.setCurrentPrice(currentPrice);
             fullLot.setLastBidderName(bid.getBidderName());
             fullLot.setLastBidDate(bid.getBidDate());
         }
@@ -121,5 +128,28 @@ public class LotServiceImpl implements LotService {
         Pageable lotsOfConcretePage = PageRequest.of(Objects.requireNonNullElse(pageIndex, 0), 10);
         return lotRepository.findAllByStatus(lotsOfConcretePage, status).stream()
                 .map(LotDTO::fromLot).collect(Collectors.toList());
+    }
+
+    @Override
+    public ResponseEntity<Resource> getCSVFile() throws IOException {
+        List<Lot> lots = lotRepository.findAllLots();
+        ArrayList<CSVFormatLot> csvLots  = new ArrayList<>();
+        for (Lot lot : lots) {
+            Bid bid = lotRepository.getLastBidder(lot.getId());
+            if (bid == null) {
+                csvLots.add(new CSVFormatLot(lot.getId(), lot.getTitle(), lot.getStatus(),
+                        "No bids", lot.getStartPrice()));
+            } else {
+                csvLots.add(new CSVFormatLot(lot.getId(), lot.getTitle(), lot.getStatus(),
+                        bid.getBidderName(), lotRepository.getCurrentPrice(lot.getId())));
+            }
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        byte[] bytes = objectMapper.writeValueAsBytes(csvLots);
+        Resource resource = new ByteArrayResource(bytes);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"lots.csv\"")
+                .header(HttpHeaders.CONTENT_TYPE, "application/csv")
+                .body(resource);
     }
 }
