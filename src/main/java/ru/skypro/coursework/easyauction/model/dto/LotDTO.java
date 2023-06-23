@@ -5,6 +5,7 @@ import ru.skypro.coursework.easyauction.model.Lot;
 
 @Getter
 @Setter
+@ToString
 
 public class LotDTO {
 

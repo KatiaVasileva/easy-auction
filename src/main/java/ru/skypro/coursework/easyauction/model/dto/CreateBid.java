@@ -1,13 +1,14 @@
 package ru.skypro.coursework.easyauction.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import ru.skypro.coursework.easyauction.model.Bid;
 
 @Getter
 @Setter
+@ToString
 
 public class CreateBid {
 

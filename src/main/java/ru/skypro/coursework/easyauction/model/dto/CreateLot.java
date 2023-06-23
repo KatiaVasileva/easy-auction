@@ -5,21 +5,13 @@ import ru.skypro.coursework.easyauction.model.Lot;
 
 @Getter
 @Setter
+@ToString
 
 public class CreateLot {
     private String title;
     private String description;
     private int startPrice;
     private int bidPrice;
-
-    public static CreateLot fromLot(Lot lot) {
-        CreateLot createLot = new CreateLot();
-        createLot.setTitle(lot.getTitle());
-        createLot.setDescription(lot.getDescription());
-        createLot.setStartPrice(lot.getStartPrice());
-        createLot.setBidPrice(lot.getBidPrice());
-        return createLot;
-    }
 
     public Lot toLot() {
         Lot lot = new Lot();

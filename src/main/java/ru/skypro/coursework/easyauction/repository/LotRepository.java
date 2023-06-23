@@ -21,26 +21,15 @@ public interface LotRepository extends CrudRepository<Lot, Integer> {
             "HAVING b.bidDate = (SELECT MIN(b.bidDate) FROM Bid b WHERE b.lot.id = ?1)")
     Bid getFirstBidder(int id);
 
-    @Query(value = "SELECT new ru.skypro.coursework.easyauction.model.Bid(b.bidderName, b.bidDate) " +
-            "FROM Bid b WHERE b.lot.id = ?1 GROUP BY b.bidderName, b.bidDate " +
-            "HAVING b.bidDate = (SELECT MAX(b.bidDate) FROM Bid b WHERE b.lot.id = ?1)")
-    Bid getLastBidder(int id);
-
-    @Query(value = "SELECT DISTINCT ((SELECT COUNT(bids) FROM bids WHERE lot_id = ?1) * lots.bid_price + lots.start_price) " +
-            "FROM lots JOIN bids ON bids.lot_id = lots.id " +
-            "WHERE bids.lot_id = ?1", nativeQuery = true)
-    int getCurrentPrice(int id);
-
-    @Query(value = "SELECT bidder_name, MAX(bid_date) FROM bids WHERE lot_id = ?1 GROUP BY bidder_name " +
-            "ORDER BY COUNT(bidder_name) DESC, MAX(bid_date) DESC LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT new ru.skypro.coursework.easyauction.model.Bid(b.bidderName, MAX(b.bidDate)) " +
+            "FROM Bid b WHERE b.lot.id = ?1 GROUP BY b.bidderName " +
+            "ORDER BY COUNT(b.bidderName) DESC, MAX(b.bidDate) DESC LIMIT 1")
     Bid getMostFrequentBidder(int id);
 
-    @Query(value = "SELECT * FROM lots WHERE status = ?1", nativeQuery = true)
+    @Query(value = "SELECT l FROM Lot l WHERE l.status = ?1")
     List<Lot> findAllByStatus(Pageable lotsOfConcretePage, String status);
 
-
-    @Query(value = "SELECT * FROM lots", nativeQuery = true)
+    @Query(value = "SELECT l FROM Lot l")
     List<Lot> findAllLots();
-
 }
 
