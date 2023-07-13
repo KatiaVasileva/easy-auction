@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id:  21062023_lots_bids
+      author:  katiavasileva
+      changes:
+        -  addForeignKeyConstraint:
+             baseColumnNames:  lot_id
+             baseTableName:  bids
+             baseTableSchemaName:  public
+             constraintName:  fk_bids_lots
+             referencedColumnNames:  id
+             referencedTableName:  lots
+             referencedTableSchemaName:  public

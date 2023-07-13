@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@ToString
 
 public class BidDTO {
     private String bidderName;

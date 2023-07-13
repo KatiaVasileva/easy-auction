@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/changesets/21062023_create_lots.yml
+  - include:
+      file: liquibase/changesets/21062023_create_bids.yml
+  - include:
+      file: liquibase/changesets/21062023_lots_bids.yml

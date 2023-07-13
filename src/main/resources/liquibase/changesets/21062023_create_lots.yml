@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 21062023_create_lots
+      author: katiavasileva
+      changes:
+        - createTable:
+            tableName: lots
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: status
+                  type: varchar(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_price
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: bid_price
+                  type: int
+                  constraints:
+                    nullable: false

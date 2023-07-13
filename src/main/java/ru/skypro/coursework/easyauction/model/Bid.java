@@ -1,7 +1,6 @@
 package ru.skypro.coursework.easyauction.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 
 @Entity
 @Table(name = "bids")
@@ -31,10 +31,6 @@ public class Bid {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lot_id")
     private Lot lot;
-
-    public Bid(String bidderName) {
-        this.bidderName = bidderName;
-    }
 
     public Bid(String bidderName, LocalDateTime bidDate) {
         this.bidderName = bidderName;
