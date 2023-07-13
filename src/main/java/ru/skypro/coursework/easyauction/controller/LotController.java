@@ -67,8 +67,8 @@ public class LotController {
                     responseCode = "404", description = "Лот не найден"
             )
     })
-    public void bid(@PathVariable int id, @Valid @RequestBody CreateBid bid) {
-        lotService.bid(id, bid);
+    public BidDTO bid(@PathVariable int id, @Valid @RequestBody CreateBid bid) {
+        return lotService.bid(id, bid);
     }
 
     @PostMapping("/{id}/stop")

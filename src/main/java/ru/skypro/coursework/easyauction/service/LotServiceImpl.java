@@ -18,6 +18,7 @@ import ru.skypro.coursework.easyauction.exceptions.LotStatusException;
 import ru.skypro.coursework.easyauction.model.Bid;
 import ru.skypro.coursework.easyauction.model.Lot;
 import ru.skypro.coursework.easyauction.model.dto.*;
+import ru.skypro.coursework.easyauction.repository.BidRepository;
 import ru.skypro.coursework.easyauction.repository.LotRepository;
 
 import java.io.*;
@@ -32,8 +33,11 @@ public class LotServiceImpl implements LotService {
 
     private final LotRepository lotRepository;
 
-    public LotServiceImpl(LotRepository lotRepository) {
+    private final BidRepository bidRepository;
+
+    public LotServiceImpl(LotRepository lotRepository, BidRepository bidRepository) {
         this.lotRepository = lotRepository;
+        this.bidRepository = bidRepository;
     }
 
     @Override
@@ -61,7 +65,7 @@ public class LotServiceImpl implements LotService {
     }
 
     @Override
-    public void bid(int id, CreateBid createBid) {
+    public BidDTO bid(int id, CreateBid createBid) {
         Bid bid = createBid.toBid();
         Lot lot = getLotById(id);
         try {
@@ -74,9 +78,10 @@ public class LotServiceImpl implements LotService {
         }
         String name = bid.getBidderName();
         LocalDateTime localDateTime = bid.getBidDate();
-        lotRepository.createBid(name, localDateTime, id);
-        LOGGER.info("Bid was created: {}", bid);
+        bidRepository.createBid(name, localDateTime, id);
+        LOGGER.info("Bid was created: {}", BidDTO.fromBid(bid));
         LOGGER.debug("Database was updated");
+        return BidDTO.fromBid(bid);
     }
 
     @Override
@@ -99,7 +104,7 @@ public class LotServiceImpl implements LotService {
     @Override
     public BidDTO getFirstBidder(int id) {
         checkLotExistenceById(id);
-        Bid bid = lotRepository.getFirstBidder(id);
+        Bid bid = bidRepository.getFirstBidder(id);
         checkBidExistence(bid);
         BidDTO bidDTO = BidDTO.fromBid(bid);
         LOGGER.info("First bidder for lot id = {} was found: {}", id, bidDTO);
@@ -109,7 +114,7 @@ public class LotServiceImpl implements LotService {
     @Override
     public BidDTO getMostFrequentBidder(int id) {
         checkLotExistenceById(id);
-        Bid bid = lotRepository.getMostFrequentBidder(id);
+        Bid bid = bidRepository.getMostFrequentBidder(id);
         checkBidExistence(bid);
         BidDTO bidDTO = BidDTO.fromBid(bid);
         LOGGER.info("Most frequent bidder for lot id = {} was found: {}", id, bidDTO);

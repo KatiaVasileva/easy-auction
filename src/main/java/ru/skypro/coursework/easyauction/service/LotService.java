@@ -13,7 +13,7 @@ public interface LotService {
 
     void startBidding(int id);
 
-    void bid(int id, CreateBid bid);
+    BidDTO bid(int id, CreateBid bid);
 
     void stopBidding(int id);
 
