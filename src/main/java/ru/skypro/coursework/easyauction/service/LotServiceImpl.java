@@ -41,15 +41,16 @@ public class LotServiceImpl implements LotService {
     }
 
     @Override
-    public void createLot(CreateLot createLot) {
+    public CreateLot createLot(CreateLot createLot) {
         Lot lot = createLot.toLot();
         lotRepository.save(lot);
         LOGGER.info("Lot was created: {}", lot);
         LOGGER.debug("Database was updated");
+        return CreateLot.fromLot(lot);
     }
 
     @Override
-    public void startBidding(int id) {
+    public LotDTO startBidding(int id) {
         Lot lot = getLotById(id);
         try {
             if (lot.getStatus().equals("Stopped")) {
@@ -62,6 +63,7 @@ public class LotServiceImpl implements LotService {
         lot.setStatus("Started");
         lotRepository.save(lot);
         LOGGER.info("Lot with id = {} was started, lot status was changed to {}: {}", id, lot.getStatus(), lot);
+        return LotDTO.fromLot(lot);
     }
 
     @Override
@@ -85,7 +87,7 @@ public class LotServiceImpl implements LotService {
     }
 
     @Override
-    public void stopBidding(int id) {
+    public LotDTO stopBidding(int id) {
         Lot lot = getLotById(id);
         try {
             if (lot.getStatus().equals("Created")) {
@@ -97,8 +99,9 @@ public class LotServiceImpl implements LotService {
         }
         lot.setStatus("Stopped");
         lotRepository.save(lot);
-        LOGGER.info("Lot with id = {} was stopped", id);
+        LOGGER.info("Lot with id = {} was stopped: {}", id, LotDTO.fromLot(lot));
         LOGGER.debug("Database was updated");
+        return LotDTO.fromLot(lot);
     }
 
     @Override

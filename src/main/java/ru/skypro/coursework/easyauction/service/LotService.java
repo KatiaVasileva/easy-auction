@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface LotService {
 
-    void createLot(CreateLot createLot);
+    CreateLot createLot(CreateLot createLot);
 
-    void startBidding(int id);
+    LotDTO startBidding(int id);
 
     BidDTO bid(int id, CreateBid bid);
 
-    void stopBidding(int id);
+    LotDTO stopBidding(int id);
 
     BidDTO getFirstBidder(int id);
 

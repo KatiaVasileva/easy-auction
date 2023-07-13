@@ -33,8 +33,8 @@ public class LotController {
             @ApiResponse(
                     responseCode = "400", description = "Лот передан с ошибкой")
     })
-    public void createLot(@Valid @RequestBody CreateLot createLot) {
-        lotService.createLot(createLot);
+    public CreateLot createLot(@Valid @RequestBody CreateLot createLot) {
+        return lotService.createLot(createLot);
     }
 
     @PostMapping("/{id}/start")
@@ -50,8 +50,8 @@ public class LotController {
                     responseCode = "404", description = "Лот не найден"
             )
     })
-    public void startBidding(@PathVariable int id) {
-        lotService.startBidding(id);
+    public LotDTO startBidding(@PathVariable int id) {
+        return lotService.startBidding(id);
     }
 
 
@@ -83,8 +83,8 @@ public class LotController {
                     responseCode = "404", description = "Лот не найден"
             )
     })
-    public void stopBidding(@PathVariable int id) {
-        lotService.stopBidding(id);
+    public LotDTO stopBidding(@PathVariable int id) {
+        return lotService.stopBidding(id);
     }
 
     @GetMapping("/{id}/first")
